@@ -56,6 +56,13 @@ class Base(MagnifyCoreConfigurationMixin, Configuration):
     * DB_USER
     """
 
+    CISCO_API_BASE_URL = os.environ.get(
+        "CISCO_API_BASE_URL", "https://192.168.30.99:445"
+    )
+    CISCO_ROOMS_BASE_URL = os.environ.get(
+        "CISCO_ROOMS_BASE_URL", "https://cms.visio.snapcom.eu"
+    )
+
     DEBUG = False
 
     SITE_ID = 1
@@ -284,6 +291,7 @@ class Base(MagnifyCoreConfigurationMixin, Configuration):
     INSTALLED_APPS = (
         # magnify stuff
         "magnify.apps.core",
+        "magnify.apps.ciscomeetingserver",
         "magnify",
         # Third party apps
         "corsheaders",
@@ -291,6 +299,7 @@ class Base(MagnifyCoreConfigurationMixin, Configuration):
         "parler",
         "rest_framework",
         "drf_yasg",
+        "drf_spectacular",
         # Django
         "django.contrib.auth",
         "django.contrib.contenttypes",

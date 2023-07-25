@@ -12,9 +12,11 @@ import { getRoomsRoutes } from '../../utils/routes/rooms';
 import { getRootRoute, RootPath } from '../../utils/routes/root';
 
 import { getUsersRoutes } from '../../utils/routes/users';
+import { CiscooConfigs } from '../../views/cisco/configs';
+import { CiscoRoomsListView } from '../../views/cisco/list';
 import { RoomsListView } from '../../views/rooms/list';
 import { DefaultProvider } from '../DefaultProvider';
-import { SimpleLayout } from '../design-system';
+import { ManganelliLayout } from '../design-system';
 
 export const AppRouter = () => {
   const intl = useTranslations();
@@ -40,9 +42,26 @@ export const AppRouter = () => {
         {
           index: true,
           element: (
-            <SimpleLayout urlLogo={'/assets/logo-fun-mooc.svg'}>
+            <ManganelliLayout>
               <RoomsListView />
-            </SimpleLayout>
+            </ManganelliLayout>
+          ),
+        },
+        {
+          path: RootPath.CISCO,
+          element: (
+            <ManganelliLayout>
+              <CiscoRoomsListView />
+            </ManganelliLayout>
+          ),
+        },
+        {
+          index: true,
+          path: '/cisco/configs',
+          element: (
+            <ManganelliLayout>
+              <CiscooConfigs />
+            </ManganelliLayout>
           ),
         },
         { path: '*', element: <Navigate to={RootPath.HOME} /> },

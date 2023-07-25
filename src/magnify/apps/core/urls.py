@@ -8,6 +8,7 @@ from rest_framework import permissions
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt import views as jwt_views
 
+from magnify.apps.ciscomeetingserver.urls import urlpatterns as cisco_urlpatterns
 from magnify.apps.core import api
 
 SchemaView = get_schema_view(
@@ -37,6 +38,7 @@ router.register(
 # the views need to extend APIView from the rest_framework.views package.
 urlpatterns = [
     path("", include(router.urls)),
+    path("cisco/", include(cisco_urlpatterns)),
     path(
         "config.json",
         api.get_frontend_configuration,

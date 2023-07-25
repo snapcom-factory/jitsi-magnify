@@ -10,6 +10,8 @@ export interface RoutingContextInterface {
   goToPreferences: () => void;
   goToJitsiRoom: (roomId: string) => void;
   goToRoomsList: () => void;
+  goToCiscoRoomsList: () => void;
+  goToCiscoSettings: () => void;
   goToRoomSettings: (roomId?: string) => void;
 }
 
