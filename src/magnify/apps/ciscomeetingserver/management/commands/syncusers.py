@@ -6,7 +6,11 @@ from django.core.management.base import BaseCommand
 import requests
 import xmltodict
 
-from magnify.apps.ciscomeetingserver.models import ApiCredential
+from magnify.apps.ciscomeetingserver.consts import (
+    CISCO_API_PASSWORD,
+    CISCO_API_USERNAME,
+)
+
 # from magnify.apps.core.models import User
 
 
@@ -19,12 +23,7 @@ class Command(BaseCommand):
     # requireCallId=true
 
     def handle(self, *args, **options):
-        credentials = ApiCredential.objects.all()
-        if len(credentials) > 0:
-            credential = credentials[0]
-            AUTH = (credential.username, credential.password)
-        else:
-            AUTH = ("", "")
+        AUTH = (CISCO_API_USERNAME, CISCO_API_PASSWORD)
 
         # users = User.objects.all().values('username', 'email', 'jwt_sub', 'is_device')
         # for u in users:

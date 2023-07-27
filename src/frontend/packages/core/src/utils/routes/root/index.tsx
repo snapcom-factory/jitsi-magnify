@@ -9,6 +9,7 @@ export enum RootPath {
   HOME = '/',
   CISCO = '/cisco',
   CISCO_SETTINGS = '/cisco/configs',
+  CISCO_ROOM_SETTINGS = '/cisco/:id/configs',
 }
 
 const rootRouteLabels = defineMessages({

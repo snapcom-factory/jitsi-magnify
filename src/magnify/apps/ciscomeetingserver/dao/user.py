@@ -25,7 +25,7 @@ class UserDAO(BaseDAO):
     def get(self, user_id: str) -> CiscoUser:
         """get unique cisco user"""
         url = f"{consts.BASE_API_URL}/users/{user_id}"
-        response = requests.get(url=url, auth=self.auth, verify=False, timeout=60)
+        response = requests.get(url=url, auth=self.AUTH, verify=False, timeout=60)
         content = xmltodict.parse(response.content)
         user = CiscoUser()
 
@@ -40,7 +40,7 @@ class UserDAO(BaseDAO):
     def get_all(self) -> List[CiscoUser]:
         """Get all cisco users"""
         url = f"{consts.BASE_API_URL}/users"
-        response = requests.get(url=url, auth=self.auth, verify=False, timeout=60)
+        response = requests.get(url=url, auth=self.AUTH, verify=False, timeout=60)
         content = xmltodict.parse(response.content)
         users = []
         for user in content["users"]["user"]:

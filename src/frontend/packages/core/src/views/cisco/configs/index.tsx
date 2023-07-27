@@ -1,17 +1,20 @@
 import { Button } from '@openfun/cunningham-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
-import { Form, Formik } from 'formik';
-import { Box, Heading } from 'grommet';
+// import { Form, Formik } from 'formik';
+import { Box, Heading, List, Spinner, Text } from 'grommet';
 import * as React from 'react';
 import { defineMessages } from 'react-intl';
-import { FormikInput } from '../../../components/design-system/Formik/Input';
-import { FormikSubmitButton } from '../../../components/design-system/Formik/SubmitButton/FormikSubmitButton';
+// import { FormikInput } from '../../../components/design-system/Formik/Input';
+// import { FormikSubmitButton } from '../../../components/design-system/Formik/SubmitButton/FormikSubmitButton';
 import { useRouting } from '../../../context';
 import { useTranslations } from '../../../i18n';
 import { KeycloakService } from '../../../services';
 import { CiscoApiCredentialRepository } from '../../../services/cisco';
 import { MagnifyQueryKeys } from '../../../utils';
+import { useParams } from 'react-router-dom';
+import CiscoCoSpaceRepository from '../../../services/cisco/cospaces.repository';
+import { StatusCritical, StatusGood } from 'grommet-icons';
 
 const messages = defineMessages({
   title_part_one: {
@@ -60,12 +63,14 @@ const messages = defineMessages({
 export function CiscooConfigs() {
   const intl = useTranslations();
   const router = useRouting();
+  const { id } = useParams();
 
-  const { data, isLoading, status } = useQuery(
-    [MagnifyQueryKeys.CISCO_CONFIGS],
-    CiscoApiCredentialRepository.get,
+  const { data, isLoading, status, isFetching } = useQuery(
+    [MagnifyQueryKeys.CISCO_ROOM_CONFIGS],
+    () => CiscoCoSpaceRepository.get(id || ""),
     {
       enabled: KeycloakService.isLoggedIn(),
+      refetchOnMount: true
     },
   );
   const queryClient = useQueryClient();
@@ -89,44 +94,78 @@ export function CiscooConfigs() {
 
   return (
     <>
-      <Box align={'end'} direction={'column'} height={{ min: 'auto' }} justify={'end'}>
-        <Button color="secondary" onClick={() => router.goToCiscoRoomsList()} size={'small'}>
-          {intl.formatMessage(messages.cisco_rooms_button)}
-        </Button>
-      </Box>
-      <Box align={'center'} direction={'column'} height={{ min: 'auto' }} justify={'center'}>
-        <Heading color={'brand'} level={1} margin="none" textAlign={'center'}>
-          {intl.formatMessage(messages.title_part_one)}
-        </Heading>
-        <Heading color={'brand'} level={3} margin="none" textAlign={'center'}>
-          {intl.formatMessage(messages.title_part_two)}
-        </Heading>
-      </Box>
-      {!isLoading && status == 'success' && (
-        <Formik initialValues={data ? data : {}} onSubmit={handleSubmit}>
-          <Form>
-            <FormikInput
-              {...{ autoFocus: true }}
-              fullWidth
-              label={intl.formatMessage(messages.username_label)}
-              name="username"
-              text={intl.formatMessage(messages.username_text)}
-            />
-            <FormikInput
-              {...{ autoFocus: true }}
-              fullWidth
-              label={intl.formatMessage(messages.password_label)}
-              name="password"
-              text={intl.formatMessage(messages.password_text)}
-            />
-            <FormikSubmitButton
-              isLoading={mutation.isLoading}
-              label={intl.formatMessage(messages.submit_abel)}
-            />
-          </Form>
-        </Formik>
+      {isFetching && (
+        <Box align={'center'} direction={'column'} height={{ min: 'auto' }} justify={'center'}>
+          <Spinner />
+        </Box>
       )}
-      {/* <MyRooms baseJitsiUrl={'/j'} isLoading={isLoading} rooms={rooms ?? []} /> */}
+      {!isFetching && status == 'success' && (
+        <>
+          <Box align={'end'} direction={'column'} height={{ min: 'auto' }} justify={'end'}>
+            <Button color="secondary" onClick={() => router.goToCiscoRoomsList()} size={'small'}>
+              {intl.formatMessage(messages.cisco_rooms_button)}
+            </Button>
+          </Box>
+          <Box align={'center'} direction={'column'} height={{ min: 'auto' }} justify={'center'}>
+            <Heading color={'brand'} level={1} margin="none" textAlign={'center'}>
+              {data.name}
+            </Heading>
+          </Box>
+          <Box align={'start'} direction={'row'} height={{ min: 'auto' }} justify={'start'} margin={{top: "xlarge"}}>
+            <Box align={'start'} background="white" direction={'column'} height={{ min: 'auto' }} justify={'stretch'} margin={{right: "small"}} pad="large" width={{min: "50%"}}>
+              <List
+                margin="none"
+                primaryKey="name"
+                secondaryKey={(item: { name: string, value: any }) => (<Text>
+                  {
+                    typeof item.value == "boolean"
+                    ? <>
+                        {item.value == true ? <StatusGood /> : <StatusCritical />}
+                      </>
+                    : <>{item.value}</>
+                  }
+                </Text>)}
+                data={
+                  Object
+                    .entries(data)
+                    .map(([key, value]) => (
+                      { name: key.replaceAll("_", " "), value: value }
+                    ))
+                }
+              />
+            </Box>
+            <Box align={'start'} direction={'column'} height={{ min: 'auto' }} justify={'start'} margin={{left: "small"}} width={{min: "50%"}}>
+              TODO: Edit form and delete button
+              {/*
+                <Formik initialValues={data ? data : {}} onSubmit={handleSubmit}>
+                  <Form>
+                    <FormikInput
+                      {...{ autoFocus: true }}
+                      fullWidth
+                      label={intl.formatMessage(messages.username_label)}
+                      name="username"
+                      text={intl.formatMessage(messages.username_text)}
+                    />
+                    <FormikInput
+                      {...{ autoFocus: true }}
+                      fullWidth
+                      label={intl.formatMessage(messages.password_label)}
+                      name="password"
+                      text={intl.formatMessage(messages.password_text)}
+                    />
+                    <FormikSubmitButton
+                      isLoading={mutation.isLoading}
+                      label={intl.formatMessage(messages.submit_abel)}
+                    />
+                  </Form>
+                </Formik>
+              */}
+            </Box>
+          </Box>
+
+
+        </>
+      )}
     </>
   );
 }

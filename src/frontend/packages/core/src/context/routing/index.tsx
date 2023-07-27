@@ -12,6 +12,7 @@ export interface RoutingContextInterface {
   goToRoomsList: () => void;
   goToCiscoRoomsList: () => void;
   goToCiscoSettings: () => void;
+  goToCiscoRoomSettings: (roomId?: string) => void;
   goToRoomSettings: (roomId?: string) => void;
 }
 

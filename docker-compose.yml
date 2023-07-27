@@ -27,6 +27,8 @@ services:
     platform: linux/amd64
     environment:
       - DJANGO_CONFIGURATION=Development
+      - CISCO_API_USERNAME=${CISCO_API_USERNAME:-username}
+      - CISCO_API_PASSWORD=${CISCO_API_PASSWORD:-password}
     env_file:
       - env.d/common
       - env.d/${DB_HOST:-postgresql}

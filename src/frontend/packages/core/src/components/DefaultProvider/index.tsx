@@ -48,6 +48,11 @@ export const DefaultProvider = ({ ...props }: DefaultProviderProps) => {
             navigate(RoomsPath.ROOMS_SETTINGS.replace(':id', roomId));
           }
         },
+        goToCiscoRoomSettings: (roomId?: string) => {
+          if (roomId) {
+            navigate(RootPath.CISCO_ROOM_SETTINGS.replace(':id', roomId));
+          }
+        },
       }}
     >
       {props.children}

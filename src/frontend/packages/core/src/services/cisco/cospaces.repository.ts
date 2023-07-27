@@ -13,6 +13,16 @@ export class CiscoCoSpaceRepository {
 
     return response.data;
   }
+
+  public static async get(id: string): Promise<any | null> {
+    const url = RoutesBuilderService.build(CoSpaceApiRoutes.GET, {id: id});
+    let response: AxiosResponse<RoomResponse>;
+
+    response = await HttpService.MagnifyApi.get(url);
+
+    return response.data;
+  }
+
 }
 
 export default CiscoCoSpaceRepository;

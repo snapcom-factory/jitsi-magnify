@@ -1,8 +1,11 @@
 """ A base DAO objet """
+from magnify.apps.ciscomeetingserver.consts import (
+    CISCO_API_PASSWORD,
+    CISCO_API_USERNAME,
+)
 
 
 class BaseDAO:
     """A base DAO objet"""
 
-    def __init__(self, username: str, password: str) -> None:
-        self.auth = (username, password)
+    AUTH = (CISCO_API_USERNAME, CISCO_API_PASSWORD)

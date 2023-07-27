@@ -4,19 +4,17 @@ from django.core.management.base import BaseCommand
 import requests
 import xmltodict
 
-from magnify.apps.ciscomeetingserver.models import ApiCredential
+from magnify.apps.ciscomeetingserver.consts import (
+    CISCO_API_PASSWORD,
+    CISCO_API_USERNAME,
+)
 
 
 class Command(BaseCommand):
     help = "Closes the specified poll for voting"
 
     def handle(self, *args, **options):
-        credentials = ApiCredential.objects.all()
-        if len(credentials) > 0:
-            credential = credentials[0]
-            AUTH = (credential.username, credential.password)
-        else:
-            AUTH = ("", "")
+        AUTH = (CISCO_API_USERNAME, CISCO_API_PASSWORD)
 
         # 1: On récupère les profiles "invite" et "organisateur"
         # TODO Get Or Create invite and organisateur

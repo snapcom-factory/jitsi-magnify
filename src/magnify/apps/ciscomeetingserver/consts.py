@@ -1,11 +1,16 @@
 """ cisco app consts """
+import os
+
 from django.conf import settings
 
 ACCESS_METHODS_GUEST_KEY = "invite"
 ACCESS_METHODS_ORGANIZER_KEY = "organisateur"
+
 API_HOST = settings.CISCO_API_BASE_URL
 BASE_API_URL = f"{API_HOST}/api/v1"
 BASE_ROOMS_URL = settings.CISCO_ROOMS_BASE_URL
+CISCO_API_USERNAME = os.environ.get("CISCO_API_USERNAME")
+CISCO_API_PASSWORD = os.environ.get("CISCO_API_PASSWORD")
 CALLLEGPROFILES_TEMPLATES = {
     ACCESS_METHODS_ORGANIZER_KEY: {
         "needsActivation": False,

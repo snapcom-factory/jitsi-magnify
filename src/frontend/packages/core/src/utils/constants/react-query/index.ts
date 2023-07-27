@@ -4,4 +4,5 @@ export enum MagnifyQueryKeys {
   AUTH_USER = 'authUser',
   CISCO_CONFIGS = 'ciscoConfigs',
   CISCO_ROOMS = 'ciscoRooms',
+  CISCO_ROOM_CONFIGS = 'ciscoRoomConfigs',
 }

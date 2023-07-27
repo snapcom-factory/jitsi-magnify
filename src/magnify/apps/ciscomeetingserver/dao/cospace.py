@@ -23,39 +23,63 @@ class CoSpaceDAO(BaseDAO):
         ("owner_jid", "ownerJid"),
     ]
 
-    def __init__(self, username: str, password: str) -> None:
-        super().__init__(username=username, password=password)
-
     def _get_access_method(self, cospace_id: str, access_method_id: str) -> list:
         url = f"{consts.BASE_API_URL}/coSpaces/{cospace_id}/accessMethods/{access_method_id}"
-        response = requests.get(url=url, auth=self.auth, verify=False, timeout=60)
+        response = requests.get(url=url, auth=self.AUTH, verify=False, timeout=60)
         content = xmltodict.parse(response.content)
         return content["accessMethod"]
 
     def _get_all_access_methods(self, cospace_id: str) -> list:
         url = f"{consts.BASE_API_URL}/coSpaces/{cospace_id}/accessMethods"
-        response = requests.get(url=url, auth=self.auth, verify=False, timeout=60)
+        response = requests.get(url=url, auth=self.AUTH, verify=False, timeout=60)
         content = xmltodict.parse(response.content)
+
+        if content["accessMethods"]["@total"] == "0":
+            return None
+        if content["accessMethods"]["@total"] == "1":
+            content["accessMethods"]["accessMethod"] = [
+                content["accessMethods"]["accessMethod"]
+            ]
 
         try:
             guest_id = next(
                 access_method
                 for access_method in content["accessMethods"]["accessMethod"]
-                if access_method["name"] == consts.ACCESS_METHODS_GUEST_KEY
+                if access_method["name"]
+                and access_method["name"].lower() == consts.ACCESS_METHODS_GUEST_KEY
             )["@id"]
+        except StopIteration:
+            guest_id = None
+        except KeyError:
+            guest_id = None
+
+        try:
             organizer_id = next(
                 access_method
                 for access_method in content["accessMethods"]["accessMethod"]
-                if access_method["name"] == consts.ACCESS_METHODS_ORGANIZER_KEY
+                if access_method["name"]
+                and access_method["name"].lower() == consts.ACCESS_METHODS_ORGANIZER_KEY
             )["@id"]
-            access_methods = {
-                consts.ACCESS_METHODS_GUEST_KEY: self._get_access_method(
+        except StopIteration:
+            organizer_id = None
+        except KeyError:
+            organizer_id = None
+
+        try:
+            access_methods = {}
+            if guest_id:
+                access_methods[
+                    consts.ACCESS_METHODS_GUEST_KEY
+                ] = self._get_access_method(
                     cospace_id=cospace_id, access_method_id=guest_id
-                ),
-                consts.ACCESS_METHODS_ORGANIZER_KEY: self._get_access_method(
+                )
+            if organizer_id:
+                access_methods[
+                    consts.ACCESS_METHODS_ORGANIZER_KEY
+                ] = self._get_access_method(
                     cospace_id=cospace_id, access_method_id=organizer_id
-                ),
-            }
+                )
+
             return access_methods
         except KeyError:
             return None
@@ -65,7 +89,7 @@ class CoSpaceDAO(BaseDAO):
     def _get_base(self, cospace_id: str):
         """get base informations of cospace"""
         url = f"{consts.BASE_API_URL}/coSpaces/{cospace_id}"
-        response = requests.get(url=url, auth=self.auth, verify=False, timeout=60)
+        response = requests.get(url=url, auth=self.AUTH, verify=False, timeout=60)
         content = xmltodict.parse(response.content)
         cospace = CoSpace()
 
@@ -78,9 +102,9 @@ class CoSpaceDAO(BaseDAO):
 
     def get(self, cospace_id: str) -> CoSpace:
         """get unique cospace"""
-
         cospace = self._get_base(cospace_id=cospace_id)
         access_methods = self._get_all_access_methods(cospace_id=cospace_id)
+
         if access_methods is not None:
             try:
                 cospace.owner_call_id = access_methods[
@@ -110,12 +134,15 @@ class CoSpaceDAO(BaseDAO):
     def get_all(self) -> List[CoSpace]:
         """get all cospaces"""
         url = f"{consts.BASE_API_URL}/coSpaces"
-        print(url)
-        response = requests.get(url=url, auth=self.auth, verify=False, timeout=60)
-        print("------>> ", response.status_code, type(response.status_code))
+        response = requests.get(url=url, auth=self.AUTH, verify=False, timeout=60)
         if response.status_code == 401:
             raise PermissionDenied
         content = xmltodict.parse(response.content)
+        if content["coSpaces"]["@total"] == "0":
+            return []
+        if content["coSpaces"]["@total"] == "1":
+            content["coSpaces"]["coSpace"] = [content["coSpaces"]["coSpace"]]
+
         cospaces = []
         for cospace in content["coSpaces"]["coSpace"]:
             cospace_id = cospace["@id"]
@@ -131,7 +158,7 @@ class CoSpaceDAO(BaseDAO):
         response = requests.post(
             url=url,
             data=consts.CALLLEGPROFILES_TEMPLATES[name],
-            auth=self.auth,
+            auth=self.AUTH,
             verify=False,
             timeout=60,
         )
@@ -141,7 +168,7 @@ class CoSpaceDAO(BaseDAO):
     def _get_or_create_calllegprofiles(self) -> Any:
         url = f"{consts.BASE_API_URL}/callLegProfiles"
         calllegprofiles_response = requests.get(
-            url=url, auth=self.auth, verify=False, timeout=60
+            url=url, auth=self.AUTH, verify=False, timeout=60
         )
         call_leg_profiles = xmltodict.parse(calllegprofiles_response.content)
         try:
@@ -176,7 +203,7 @@ class CoSpaceDAO(BaseDAO):
         url = f"{consts.BASE_API_URL}/coSpaces"
         cospace_data = {**data, "requireCallId": True}
         response = requests.post(
-            url=url, data=cospace_data, auth=self.auth, verify=False, timeout=30
+            url=url, data=cospace_data, auth=self.AUTH, verify=False, timeout=30
         )
         cospace_cisco_id = response.headers["Location"].split("/")[-1]
 
@@ -197,10 +224,10 @@ class CoSpaceDAO(BaseDAO):
 
         url = f"{consts.BASE_API_URL}/coSpaces/{cospace_cisco_id}/accessMethods"
         requests.post(
-            url=url, data=organizer_data, auth=self.auth, verify=False, timeout=30
+            url=url, data=organizer_data, auth=self.AUTH, verify=False, timeout=30
         )
         requests.post(
-            url=url, data=guest_data, auth=self.auth, verify=False, timeout=30
+            url=url, data=guest_data, auth=self.AUTH, verify=False, timeout=30
         )
 
         # 3 and

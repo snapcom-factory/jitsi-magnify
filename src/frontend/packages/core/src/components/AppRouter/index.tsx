@@ -64,6 +64,15 @@ export const AppRouter = () => {
             </ManganelliLayout>
           ),
         },
+        {
+          index: true,
+          path: '/cisco/:id/configs',
+          element: (
+            <ManganelliLayout>
+              <CiscooConfigs />
+            </ManganelliLayout>
+          ),
+        },
         { path: '*', element: <Navigate to={RootPath.HOME} /> },
       ],
     },
