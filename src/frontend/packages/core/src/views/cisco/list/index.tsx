@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { Box, Heading, Spinner } from 'grommet';
+import { Box, Heading } from 'grommet';
 import * as React from 'react';
 import { defineMessages } from 'react-intl';
 import { useRouting } from '../../../context';
@@ -7,7 +7,7 @@ import { useTranslations } from '../../../i18n';
 import { KeycloakService } from '../../../services';
 import CiscoCoSpaceRepository from '../../../services/cisco/cospaces.repository';
 import { MagnifyQueryKeys } from '../../../utils';
-import { CoSpaceInterface, MyCiscoRooms } from '../../../components/cisco/MyRooms';
+import { MyCiscoRooms } from '../../../components/cisco/MyRooms';
 
 const messages = defineMessages({
   title_part_one: {
@@ -30,7 +30,7 @@ const messages = defineMessages({
 export function CiscoRoomsListView() {
   const intl = useTranslations();
 
-  const { data, isLoading, isError, refetch } = useQuery(
+  const { data, isError, isFetching, isLoading, refetch } = useQuery(
     [MagnifyQueryKeys.CISCO_ROOMS],
     CiscoCoSpaceRepository.getAll,
     {
@@ -59,7 +59,7 @@ export function CiscoRoomsListView() {
         </Heading>
       </Box>
       {KeycloakService.isLoggedIn() ? (
-        <MyCiscoRooms rooms={data} isLoading={isLoading} isError={isError} refetch={refetch} />
+        <MyCiscoRooms isError={isError}  isFetching={isFetching} isLoading={isLoading} refetch={refetch} rooms={data} />
       ) : (
         <Box align={'center'} direction={'column'} height={{ min: 'auto' }} justify={'center'}>
           {intl.formatMessage(messages.login)}

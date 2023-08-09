@@ -1,20 +1,17 @@
 import { Button } from '@openfun/cunningham-react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { AxiosError } from 'axios';
-// import { Form, Formik } from 'formik';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Box, Heading, List, Spinner, Text } from 'grommet';
 import * as React from 'react';
 import { defineMessages } from 'react-intl';
-// import { FormikInput } from '../../../components/design-system/Formik/Input';
-// import { FormikSubmitButton } from '../../../components/design-system/Formik/SubmitButton/FormikSubmitButton';
 import { useRouting } from '../../../context';
 import { useTranslations } from '../../../i18n';
 import { KeycloakService } from '../../../services';
-import { CiscoApiCredentialRepository } from '../../../services/cisco';
 import { MagnifyQueryKeys } from '../../../utils';
 import { useParams } from 'react-router-dom';
 import CiscoCoSpaceRepository from '../../../services/cisco/cospaces.repository';
 import { StatusCritical, StatusGood } from 'grommet-icons';
+import { CiscoRoomUsersConfig } from '../../../components/cisco/RoomConfig/RoomUsersConfig';
+import { CiscoRoomSecurityConfig } from '../../../components/cisco/RoomConfig/RoomSecurityConfig';
 
 const messages = defineMessages({
   title_part_one: {
@@ -65,7 +62,7 @@ export function CiscooConfigs() {
   const router = useRouting();
   const { id } = useParams();
 
-  const { data, isLoading, status, isFetching } = useQuery(
+  const { data, isLoading, status, isFetching, refetch } = useQuery(
     [MagnifyQueryKeys.CISCO_ROOM_CONFIGS],
     () => CiscoCoSpaceRepository.get(id || ""),
     {
@@ -75,97 +72,84 @@ export function CiscooConfigs() {
   );
   const queryClient = useQueryClient();
 
-  const mutation = useMutation<Object, AxiosError, Object>(CiscoApiCredentialRepository.update, {
-    onSuccess: (newCredentials) => {
-      queryClient.setQueryData([MagnifyQueryKeys.CISCO_CONFIGS], () => {
-        return newCredentials;
-      });
-      //   onSuccess(newCredentials);
-    },
-  });
-
-  const handleSubmit = (values: Object) => {
-    mutation.mutate(values, {
-      onError: (error) => {
-        console.log(error);
-      },
-    });
-  };
-
   return (
     <>
-      {isFetching && (
-        <Box align={'center'} direction={'column'} height={{ min: 'auto' }} justify={'center'}>
-          <Spinner />
-        </Box>
-      )}
-      {!isFetching && status == 'success' && (
-        <>
-          <Box align={'end'} direction={'column'} height={{ min: 'auto' }} justify={'end'}>
-            <Button color="secondary" onClick={() => router.goToCiscoRoomsList()} size={'small'}>
-              {intl.formatMessage(messages.cisco_rooms_button)}
-            </Button>
-          </Box>
+      <Box align={'end'} direction={'column'} height={{ min: 'auto' }} justify={'end'}>
+        <Button color="secondary" onClick={() => router.goToCiscoRoomsList()} size={'small'}>
+          {intl.formatMessage(messages.cisco_rooms_button)}
+        </Button>
+      </Box>
+      <Box align={'center'} direction={'column'} height={{ min: 'auto' }} justify={'center'}>
+        {!isLoading && status == 'success' && (
+          <Heading color={'brand'} level={1} margin="none" textAlign={'center'}>
+            {data.name}
+          </Heading>
+        )}
+        {isLoading && (
           <Box align={'center'} direction={'column'} height={{ min: 'auto' }} justify={'center'}>
-            <Heading color={'brand'} level={1} margin="none" textAlign={'center'}>
-              {data.name}
-            </Heading>
+            <Spinner />
           </Box>
-          <Box align={'start'} direction={'row'} height={{ min: 'auto' }} justify={'start'} margin={{top: "xlarge"}}>
-            <Box align={'start'} background="white" direction={'column'} height={{ min: 'auto' }} justify={'stretch'} margin={{right: "small"}} pad="large" width={{min: "50%"}}>
-              <List
-                margin="none"
-                primaryKey="name"
-                secondaryKey={(item: { name: string, value: any }) => (<Text>
-                  {
-                    typeof item.value == "boolean"
+        )}
+      </Box>
+      <Box align={'start'} direction={'row'} height={{ min: 'auto' }} justify={'start'} margin={{ top: "xlarge" }}>
+        <Box align={'start'} direction={'column'} height={{ min: 'auto' }} justify={'start'} margin={{ left: "small" }} width={{ min: "50%" }}>
+          {data?.role !== "member" && (
+            <CiscoRoomSecurityConfig room={data} isFetching={isFetching} refetch={refetch} status={status} />
+          )}
+
+          {isLoading ? (
+            <Box align={'center'} direction={'column'} height={{ min: 'auto' }} justify={'center'}>
+              <Spinner />
+            </Box>
+          ) : (
+            <CiscoRoomUsersConfig
+              addUser={() => { }}
+              onUpdateUser={() => { }}
+              onDeleteUser={() => { }}
+              room={data}
+            />
+          )}
+
+        </Box>
+        <Box align={'start'} background="white" direction={'column'} height={{ min: 'auto' }} justify={'stretch'} margin={{ right: "small" }} pad="large" width={{ min: "50%" }}>
+          {!isFetching && status == 'success' && (
+            <List
+              margin="none"
+              primaryKey="name"
+              secondaryKey={(item: { name: string, value: any }) => (<Text>
+                {
+                  typeof item.value == "boolean"
                     ? <>
-                        {item.value == true ? <StatusGood /> : <StatusCritical />}
-                      </>
+                      {item.value == true ? <StatusGood /> : <StatusCritical />}
+                    </>
                     : <>{item.value}</>
-                  }
-                </Text>)}
-                data={
-                  Object
-                    .entries(data)
-                    .map(([key, value]) => (
-                      { name: key.replaceAll("_", " "), value: value }
-                    ))
                 }
-              />
+              </Text>)}
+              data={
+                Object
+                  .entries(data)
+                  .map(([key, value]) => (
+                    { name: key.replaceAll("_", " "), value: value }
+                  ))
+                  .filter(e => {
+                    if(e.name.includes('owner') && data?.role === "member")
+                      return false
+                    return true
+                  })
+
+              }
+            />
+          )}
+          {isFetching && (
+            <Box align={'center'} direction={'column'} height={{ min: 'auto' }} justify={'center'}>
+              <Spinner />
             </Box>
-            <Box align={'start'} direction={'column'} height={{ min: 'auto' }} justify={'start'} margin={{left: "small"}} width={{min: "50%"}}>
-              TODO: Edit form and delete button
-              {/*
-                <Formik initialValues={data ? data : {}} onSubmit={handleSubmit}>
-                  <Form>
-                    <FormikInput
-                      {...{ autoFocus: true }}
-                      fullWidth
-                      label={intl.formatMessage(messages.username_label)}
-                      name="username"
-                      text={intl.formatMessage(messages.username_text)}
-                    />
-                    <FormikInput
-                      {...{ autoFocus: true }}
-                      fullWidth
-                      label={intl.formatMessage(messages.password_label)}
-                      name="password"
-                      text={intl.formatMessage(messages.password_text)}
-                    />
-                    <FormikSubmitButton
-                      isLoading={mutation.isLoading}
-                      label={intl.formatMessage(messages.submit_abel)}
-                    />
-                  </Form>
-                </Formik>
-              */}
-            </Box>
-          </Box>
+          )}
+
+        </Box>
+      </Box>
 
 
-        </>
-      )}
     </>
   );
 }

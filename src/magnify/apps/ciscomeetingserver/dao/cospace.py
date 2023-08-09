@@ -233,3 +233,17 @@ class CoSpaceDAO(BaseDAO):
         # 3 and
         cospace = self.get(cospace_id=cospace_cisco_id)
         return cospace
+
+    def update_accessmethod(self, cospace_id: str, role: str, secret: str) -> None:
+        assert role in [consts.ACCESS_METHODS_GUEST_KEY, consts.ACCESS_METHODS_ORGANIZER_KEY]
+        access_methods = self._get_all_access_methods(cospace_id=cospace_id)
+        access_method_id = access_methods[role]['@id']
+        url = f"{consts.BASE_API_URL}/coSpaces/{cospace_id}/accessMethods/{access_method_id}"
+        headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+        requests.put(
+            url=url, data={"secret": secret}, auth=self.AUTH, verify=False, timeout=30, headers=headers
+        )
+
+    def delete(self, cospace_id: str) -> None:
+        url = f"{consts.BASE_API_URL}/coSpaces/{cospace_id}"
+        requests.delete(url=url, auth=self.AUTH, verify=False, timeout=60)

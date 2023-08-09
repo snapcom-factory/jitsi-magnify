@@ -1,8 +1,10 @@
 """ CISCO objects serialiser """
-from .api_credential import ApiCredentialSerializer
-from .cospace import CoSpaceSerializer
+from .user_cospaces import CoSpaceRolesSerializer, CoSpaceRolesPostSerializer
+from .cospace import CoSpaceSerializer, CoSpaceSecretSerializer
 
 __all__ = [
-    "ApiCredentialSerializer",
+    "CoSpaceRolesPostSerializer",
+    "CoSpaceRolesSerializer",
+    "CoSpaceSecretSerializer",
     "CoSpaceSerializer",
 ]

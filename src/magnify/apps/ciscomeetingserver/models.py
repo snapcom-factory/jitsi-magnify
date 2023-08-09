@@ -2,17 +2,24 @@
 
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-
 from magnify.apps.ciscomeetingserver.consts import BASE_ROOMS_URL
-from magnify.apps.core.models import BaseModel, User
+from magnify.apps.core.models import BaseModel, User, RoleChoices
 
 
-class ApiCredential(BaseModel):
-    """Model for cisco ApiCredential"""
-
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    username = models.CharField(max_length=128)
-    password = models.CharField(max_length=128)
+class CoSpaceRoles(BaseModel):
+    """Model for CoSpaces rolses"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    cospace_cisco_id = models.CharField(max_length=128)
+    role = models.CharField(
+        max_length=20, choices=RoleChoices.choices, default=RoleChoices.MEMBER
+    )
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "cospace_cisco_id"],
+                name="unique CoSpace Role",
+            )
+        ]
 
 
 class CiscoUser(BaseModel):

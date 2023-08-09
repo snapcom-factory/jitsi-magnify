@@ -1,2 +1,2 @@
-export * from './credentials';
+export * from './cospaceroles';
 export * from './cospaces';

@@ -1,27 +1,20 @@
 from django.core.management.base import BaseCommand
-
-from magnify.apps.ciscomeetingserver.dao.cospace import CoSpaceDAO
+from magnify.apps.ciscomeetingserver.consts import (
+    CISCO_API_PASSWORD,
+    CISCO_API_USERNAME,
+)
+from ... import consts
+import requests
+import xmltodict
+import pprint
 
 
 class Command(BaseCommand):
     help = "Ping CISCO"
 
     def handle(self, *args, **options):
-        cospace_dao = CoSpaceDAO(username="", password="")
-        cospace = cospace_dao.create(
-            data={"name": "Second test from django", "ownerJid": "jobe@snapcom.fr"}
-        )
-        print("\n------------------------")
-        print("************************")
-        print(f"@id: {cospace.cisco_id}")
-        print(f"name: {cospace.name}")
-        print(f"call_id: {cospace.call_id}")
-        print(f"secret: {cospace.secret}")
-        print(f"owner_call_id: {cospace.owner_call_id}")
-        print(f"is_owner_ask_for_secret: {cospace.is_owner_ask_for_secret}")
-        print(f"owner_secret: {cospace.owner_secret}")
-        print(f"guest_call_id: {cospace.guest_call_id}")
-        print(f"is_guest_ask_for_secret: {cospace.is_guest_ask_for_secret}")
-        print(f"guest_secret: {cospace.guest_secret}")
-        print(f"owner_jid: {cospace.owner_jid}")
-        # cospace.save()
+        AUTH = (CISCO_API_USERNAME, CISCO_API_PASSWORD)
+        url = f"{consts.BASE_API_URL}/coSpaces/0f3d2d4f-d389-4e26-a315-dad2d4e8dac9/accessMethods/ad4b71aa-0284-405c-9100-be5fba942d39"
+        response = requests.get(url=url, auth=AUTH, verify=False, timeout=60)
+        content = xmltodict.parse(response.content)
+        pprint.pprint(content["accessMethod"])

@@ -10,6 +10,7 @@ from rest_framework_simplejwt import views as jwt_views
 
 from magnify.apps.ciscomeetingserver.urls import urlpatterns as cisco_urlpatterns
 from magnify.apps.core import api
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 SchemaView = get_schema_view(
     openapi.Info(
@@ -50,6 +51,7 @@ urlpatterns = [
         name="token_refresh",
     ),
     # Swagger documentation
+    path('schema/', SpectacularAPIView.as_view(), name='schema'),
     re_path(
         r"^swagger(?P<format>\.json|\.yaml)$",
         SchemaView.without_ui(cache_timeout=0),
@@ -57,7 +59,7 @@ urlpatterns = [
     ),
     re_path(
         r"^swagger/$",
-        SchemaView.with_ui("swagger", cache_timeout=0),
+        SpectacularSwaggerView.as_view(url_name='schema'),
         name="schema-swagger-ui",
     ),
     re_path(

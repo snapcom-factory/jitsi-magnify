@@ -3,30 +3,13 @@ import { Box, Text } from 'grommet';
 import { Spinner } from 'grommet/components';
 import React from 'react';
 import { defineMessages } from 'react-intl';
-import { useRouting } from '../../../context';
 import { useTranslations } from '../../../i18n';
 import { KeycloakService } from '../../../services';
-import { Room } from '../../../types/entities/room';
 import { MagnifyCard } from '../../design-system';
 import { MagnifyListContainer } from '../../design-system/List/MagnifyListContainer';
 import { CiscoRoomRow } from './RoomRow';
-
-export interface CoSpaceInterface {
-  name: string;
-  cisco_id: string;
-  call_id: string;
-  secret: string;
-  owner_call_id?: string;
-  is_owner_ask_for_secret?: boolean;
-  owner_secret?: string;
-  guest_call_id?: string;
-  is_guest_ask_for_secret?: boolean;
-  guest_secret?: string;
-  owner_jid?: string;
-  owner_url?: string;
-  guest_url?: string;
-}
-
+import { CoSpaceInterface } from '../../../types/entities/cisco/room';
+import { CiscoRegisterRoom } from './RegisterRoom';
 
 const messages = defineMessages({
   myRoomCardTitle: {
@@ -55,12 +38,12 @@ export interface MyCiscoRoomsProps {
   rooms?: CoSpaceInterface[] | undefined;
   refetch: () => void;
   isLoading?: boolean;
+  isFetching?: boolean;
   isError?: boolean;
 }
 
 export const MyCiscoRooms = ({ rooms = [], refetch, ...props }: MyCiscoRoomsProps) => {
   const intl = useTranslations();
-  const routing = useRouting();
   const isLog = KeycloakService.isLoggedIn();
 
   if (!isLog) return null;
@@ -68,7 +51,7 @@ export const MyCiscoRooms = ({ rooms = [], refetch, ...props }: MyCiscoRoomsProp
   return (
     <>
       <MagnifyCard
-        // actions={<>{isLog && <RegisterRoom />}</>}
+        actions={<>{isLog && <CiscoRegisterRoom onAddRoom={refetch} />}</>}
         title={`${intl.formatMessage(messages.myRoomCardTitle)} ${
           rooms?.length > 0 ? ` (${rooms?.length})` : ''
         }`}
@@ -76,7 +59,7 @@ export const MyCiscoRooms = ({ rooms = [], refetch, ...props }: MyCiscoRoomsProp
         <MagnifyListContainer pad="none">
           {isLog && (
             <>
-              {props.isLoading && (
+              {(props.isLoading || props.isFetching) && (
                 <Box align={'center'} height={'100px'} justify={'center'}>
                   <Spinner />
                 </Box>

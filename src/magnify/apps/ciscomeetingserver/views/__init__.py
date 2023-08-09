@@ -1,8 +1,8 @@
 """ cisco app viewsets """
-from .api_credential import ApiCredentialViewSet
+from .cospace_rolses import CoSpaceRolesViewSet
 from .co_space import CoSpaceViewSet
 
 __all__ = [
-    "ApiCredentialViewSet",
+    "CoSpaceRolesViewSet",
     "CoSpaceViewSet",
 ]
