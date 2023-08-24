@@ -133,7 +133,8 @@ export const CiscoRoomUsersConfig = ({ room, ...props }: CiscoRoomUsersConfigPro
           (isCurrentUSer && !currentUserIsOwner) ||
           (!isCurrentUSer && isOwner) ||
           isLastUser ||
-          isLastOwner,
+          isLastOwner ||
+          numberOfOwner === 1,
       },
       {
         value: RoomAccessRole.ADMINISTRATOR,

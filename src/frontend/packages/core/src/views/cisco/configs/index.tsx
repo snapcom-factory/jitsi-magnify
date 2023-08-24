@@ -111,42 +111,44 @@ export function CiscooConfigs() {
           )}
 
         </Box>
-        <Box align={'start'} background="white" direction={'column'} height={{ min: 'auto' }} justify={'stretch'} margin={{ right: "small" }} pad="large" width={{ min: "50%" }}>
-          {!isFetching && status == 'success' && (
-            <List
-              margin="none"
-              primaryKey="name"
-              secondaryKey={(item: { name: string, value: any }) => (<Text>
-                {
-                  typeof item.value == "boolean"
-                    ? <>
-                      {item.value == true ? <StatusGood /> : <StatusCritical />}
-                    </>
-                    : <>{item.value}</>
+        { false && (
+          <Box align={'start'} background="white" direction={'column'} height={{ min: 'auto' }} justify={'stretch'} margin={{ right: "small" }} pad="large" width={{ min: "50%" }}>
+            {!isFetching && status == 'success' && (
+              <List
+                margin="none"
+                primaryKey="name"
+                secondaryKey={(item: { name: string, value: any }) => (<Text>
+                  {
+                    typeof item.value == "boolean"
+                      ? <>
+                        {item.value == true ? <StatusGood /> : <StatusCritical />}
+                      </>
+                      : <>{item.value}</>
+                  }
+                </Text>)}
+                data={
+                  Object
+                    .entries(data)
+                    .map(([key, value]) => (
+                      { name: key.replaceAll("_", " "), value: value }
+                    ))
+                    .filter(e => {
+                      if(e.name.includes('owner') && data?.role === "member")
+                        return false
+                      return true
+                    })
+
                 }
-              </Text>)}
-              data={
-                Object
-                  .entries(data)
-                  .map(([key, value]) => (
-                    { name: key.replaceAll("_", " "), value: value }
-                  ))
-                  .filter(e => {
-                    if(e.name.includes('owner') && data?.role === "member")
-                      return false
-                    return true
-                  })
+              />
+            )}
+            {isFetching && (
+              <Box align={'center'} direction={'column'} height={{ min: 'auto' }} justify={'center'}>
+                <Spinner />
+              </Box>
+            )}
 
-              }
-            />
-          )}
-          {isFetching && (
-            <Box align={'center'} direction={'column'} height={{ min: 'auto' }} justify={'center'}>
-              <Spinner />
-            </Box>
-          )}
-
-        </Box>
+          </Box>
+        )}
       </Box>
 
 

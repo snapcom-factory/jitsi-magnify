@@ -47,3 +47,16 @@ class UserDAO(BaseDAO):
             user_id = user["@id"]
             users.append(self.get(user_id=user_id))
         return users
+
+    def sync_ldap(self) -> requests.Response:
+        url = f"{consts.BASE_API_URL}/ldapSyncs/"
+        return requests.post(
+            url=url,
+            auth=self.AUTH,
+            data={
+                "ldapSource": consts.CISCO_LDAP_SYNCS_SOURCE,
+                "removeWhenFinished": True
+            },
+            verify=False,
+            timeout=60,
+        )

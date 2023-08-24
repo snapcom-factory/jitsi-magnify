@@ -1,16 +1,18 @@
 """ A DAO to process cospace data from cisco API """
-from typing import Any, List
-
-from django.core.exceptions import PermissionDenied
-
+import string
+import random
 import requests
 import xmltodict
-
+from typing import Any, List
+from django.core.exceptions import PermissionDenied
 from magnify.apps.ciscomeetingserver.models import CoSpace
+from magnify.apps.core.models import User
 
 from .. import consts
 from .base import BaseDAO
 
+def generate_custom_secret():
+    return ''.join(random.choice(string.digits) for _ in range(consts.CISCO_COSPACE_PASSWORD_LENGTH))
 
 class CoSpaceDAO(BaseDAO):
     """A DAO to process cospace data from cisco API"""
@@ -99,6 +101,28 @@ class CoSpaceDAO(BaseDAO):
             except KeyError:
                 pass
         return cospace
+
+    def get_next_call_id(self) -> str:
+        """get next call id"""
+        url = f"{consts.BASE_API_URL}/coSpaces?filter=2001"
+        response = requests.get(url=url, auth=self.AUTH, verify=False, timeout=60)
+        content = xmltodict.parse(response.content)
+        if content["coSpaces"]["@total"] == "0":
+            content["coSpaces"]["coSpace"] = []
+        if content["coSpaces"]["@total"] == "1":
+            content["coSpaces"]["coSpace"] = [content["coSpaces"]["coSpace"]]
+
+        cospaces = []
+        for cospace in content["coSpaces"]["coSpace"]:
+            try:
+                cospaces.append(int(cospace['callId']))
+            except ValueError:
+                pass
+        cospaces = sorted(cospaces)
+        next_call_id = 2001000000
+        if len(cospaces) > 0:
+            next_call_id = cospaces[-1]+1
+        return str(next_call_id)
 
     def get(self, cospace_id: str) -> CoSpace:
         """get unique cospace"""
@@ -196,12 +220,20 @@ class CoSpaceDAO(BaseDAO):
             consts.ACCESS_METHODS_GUEST_KEY: invite_id,
         }
 
-    def create(self, data: dict) -> CoSpace:
+    def create(self, data: dict, user: User) -> CoSpace:
         """Create coSpace"""
 
         # 1: Create coSpaces
         url = f"{consts.BASE_API_URL}/coSpaces"
-        cospace_data = {**data, "requireCallId": True}
+        next_call_id = self.get_next_call_id()
+        cospace_data = {
+            **data,
+            "requireCallId": True,
+            "ownerJid": user.email,
+            "secret": generate_custom_secret(),
+            "callId": next_call_id,
+            "uri": next_call_id,
+        }
         response = requests.post(
             url=url, data=cospace_data, auth=self.AUTH, verify=False, timeout=30
         )
@@ -215,11 +247,13 @@ class CoSpaceDAO(BaseDAO):
             "callId": f"{cospace.call_id}00",
             "name": consts.ACCESS_METHODS_ORGANIZER_KEY,
             "callLegProfile": calllegprofiles[consts.ACCESS_METHODS_ORGANIZER_KEY],
+            "secret": generate_custom_secret(),
         }
         guest_data = {
             "callId": f"{cospace.call_id}01",
             "name": consts.ACCESS_METHODS_GUEST_KEY,
             "callLegProfile": calllegprofiles[consts.ACCESS_METHODS_GUEST_KEY],
+            "secret": generate_custom_secret(),
         }
 
         url = f"{consts.BASE_API_URL}/coSpaces/{cospace_cisco_id}/accessMethods"
@@ -230,7 +264,7 @@ class CoSpaceDAO(BaseDAO):
             url=url, data=guest_data, auth=self.AUTH, verify=False, timeout=30
         )
 
-        # 3 and
+        # 3 and retrielve cospace
         cospace = self.get(cospace_id=cospace_cisco_id)
         return cospace
 

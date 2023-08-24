@@ -14,6 +14,7 @@ export interface CoSpaceInterface {
     owner_jid?: string;
     owner_url?: string;
     guest_url?: string;
+    sip_url: string;
     role?: string;
   }
   

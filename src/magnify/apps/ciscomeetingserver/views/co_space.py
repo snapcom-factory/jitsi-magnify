@@ -8,6 +8,7 @@ from rest_framework.decorators import action
 from magnify.apps.ciscomeetingserver.dao import CoSpaceDAO
 from magnify.apps.ciscomeetingserver.serializers import CoSpaceSerializer, CoSpaceSecretSerializer
 from magnify.apps.ciscomeetingserver.models import CoSpaceRoles
+from magnify.apps.ciscomeetingserver.utils.ldap import sync_user_on_cisco
 from magnify.apps.core.models import RoleChoices
 from drf_spectacular.utils import extend_schema
 from .. import consts
@@ -79,8 +80,9 @@ class CoSpaceViewSet(viewsets.GenericViewSet):
         return Response(serializer.data)
 
     def create(self, request):
+        sync_user_on_cisco(request.user)
         dao = CoSpaceDAO()
-        cospace = dao.create(data = request.data)
+        cospace = dao.create(data = request.data, user = request.user)
         CoSpaceRoles.objects.create(
             user=request.user,
             cospace_cisco_id= cospace.cisco_id,

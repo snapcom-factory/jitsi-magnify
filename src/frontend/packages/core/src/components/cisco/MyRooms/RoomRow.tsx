@@ -1,11 +1,10 @@
 import { defineMessages } from '@formatjs/intl';
 import { Button } from '@openfun/cunningham-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Box, ButtonExtendedProps, Card, DropButton, List, Menu, Notification, Spinner, Text } from 'grommet';
-import { CircleInformation, Configure, FormTrash, MoreVertical } from 'grommet-icons';
+import { Box, Button as GrommetButton, ButtonExtendedProps, Card, DropButton, List, Menu, Notification, Spinner, Text } from 'grommet';
+import { CircleInformation, Configure, FormTrash, Link, MoreVertical } from 'grommet-icons';
 import React from 'react';
 import { useIntl } from 'react-intl';
-import { useNotification } from '../../../context';
 import { useModal } from '../../../context/modals';
 import { useRouting } from '../../../context/routing';
 import { useIsSmallSize } from '../../../hooks/useIsMobile';
@@ -14,27 +13,11 @@ import { MagnifyQueryKeys } from '../../../utils/constants/react-query';
 import { MagnifyModalTypes } from '../../design-system/Modal';
 import { CoSpaceInterface } from '../../../types/entities/cisco/room';
 import CiscoCoSpaceRepository from '../../../services/cisco/cospaces.repository';
+import { useNotification } from '../../../context';
 
 export interface CiscoRoomRowProps {
   room: CoSpaceInterface;
 }
-
-const LIST_KEYS = [
-  "name",
-  // "cisco_id",
-  // "call id",
-  // "secret",
-  "owner call id",
-  // "is_owner_ask_for_secret",
-  "owner secret",
-  "guest call id",
-  // "is_guest_ask_for_secret",
-  "guest secret",
-  "owner jid",
-  "owner url",
-  "guest url",
-]
-
 
 const messages = defineMessages({
   admin: {
@@ -70,6 +53,73 @@ const messages = defineMessages({
   },
 });
 
+const CiscoRoomLinks = ({ room }: CiscoRoomRowProps) => {
+  const intl = useIntl();
+  const notification = useNotification();
+
+  const copyLinkToClipboard = (lnk: string | undefined): void => {
+    navigator.clipboard.writeText(lnk || "").then(
+      () => {
+        notification.showNotification({
+          status: 'info',
+          title: intl.formatMessage(messages.roomLinkWasCopied),
+        });
+      },
+      () => {},
+    );
+  };
+
+  return (
+    <>
+      <List
+        margin="none"
+        primaryKey="name"
+        secondaryKey="value"
+        style={{whiteSpace: "nowrap"}}
+        data={
+          [
+            ...(
+              room.role && ['owner', 'administrator'].includes(room.role) 
+              ? [{
+                name: "Rejoindre depuis le web en tant qu'organisateur:",
+                value: (
+                  <GrommetButton
+                    plain
+                    onClick={() => copyLinkToClipboard(room.owner_url)}
+                  >
+                    {room.owner_url} <Link size='small'/>
+                  </GrommetButton>
+                )
+              }]
+              : []
+            ),
+            {
+              name: "Rejoindre depuis le web en tant qu'invité:",
+              value: (
+                <GrommetButton
+                  plain
+                  onClick={() => copyLinkToClipboard(room.guest_url)}
+                >
+                  {room.guest_url} <Link size='small'/>
+                </GrommetButton>
+              )
+            },
+            {
+              name: "Rejoindre depuis un terminal de visioconférence SIP:",
+              value: (
+                <GrommetButton
+                  plain
+                  onClick={() => copyLinkToClipboard(room.sip_url)}
+                >
+                  {room.sip_url} <Link size='small'/>
+                </GrommetButton>)
+            },
+          ]
+        }
+      />
+    </>
+  )
+}
 export const CiscoRoomRow = ({ room }: CiscoRoomRowProps) => {
   const intl = useIntl();
   const routing = useRouting();
@@ -78,14 +128,12 @@ export const CiscoRoomRow = ({ room }: CiscoRoomRowProps) => {
   const modals = useModal();
   const queryClient = useQueryClient();
 
-  const notification = useNotification();
-
   const { mutate, isLoading } = useMutation(
     async (roomId: string) => {
       return await CiscoCoSpaceRepository.delete(roomId);
     },
     {
-      onSuccess: (newRoom) => {
+      onSuccess: () => {
         queryClient.setQueryData([MagnifyQueryKeys.CISCO_ROOMS], (rooms: CoSpaceInterface[] = []) => {
           const newRooms = [...rooms];
           const index = newRooms.findIndex((roomItem) => {
@@ -114,18 +162,6 @@ export const CiscoRoomRow = ({ room }: CiscoRoomRowProps) => {
       ),
     });
   };
-
-  // const copyLinkToClipboard = (): void => {
-  //   navigator.clipboard.writeText(window.location.origin + '/' + room.name).then(
-  //     () => {
-  //       notification.showNotification({
-  //         status: 'info',
-  //         title: intl.formatMessage(messages.roomLinkWasCopied),
-  //       });
-  //     },
-  //     () => {},
-  //   );
-  // };
 
   const getMoreActionsItems = (): ButtonExtendedProps[] => {
     let result: ButtonExtendedProps[] = [
@@ -185,21 +221,7 @@ export const CiscoRoomRow = ({ room }: CiscoRoomRowProps) => {
             focusIndicator={false}
             dropContent={
               <Box pad="large" background="white">
-                <List
-                  margin="none"
-                  primaryKey="name"
-                  secondaryKey="value"
-                  data={
-                    Object
-                      .entries(room)
-                      .map(([key, value]) => ({name: key.replaceAll("_", " "), value: value}) )
-                      .filter(e => {
-                        if(e.name.includes('owner') && room.role === "member")
-                          return false
-                        return LIST_KEYS.includes(e.name) && e.value
-                      })
-                  }
-                />
+                <CiscoRoomLinks room={room} />
               </Box>
             }
           />          

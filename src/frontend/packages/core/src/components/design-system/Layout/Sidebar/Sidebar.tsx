@@ -1,7 +1,10 @@
-import { Button, Box, Nav, Sidebar } from 'grommet';
+import { Button, Box, Image, Menu, Nav, Sidebar } from 'grommet';
 import React from 'react';
 import { Projects, Group } from 'grommet-icons';
 import { useIsMobile } from '../../../../hooks/useIsMobile';
+import { useRouting } from '../../../../context';
+import logoCisco from '../SimpleLayout/logo-cisco.png';
+import logoWebconf from '../SimpleLayout/logo-webconf.jpg';
 
 const SidebarButton = ({
   icon,
@@ -16,6 +19,7 @@ const SidebarButton = ({
 
 const SidebarHeader = () => {
   const isMobile = useIsMobile();
+  const router = useRouting();
   return (
     <Box
       align="center"
@@ -24,7 +28,35 @@ const SidebarHeader = () => {
       height={'74px'}
       pad={{ horizontal: 'auto', vertical: isMobile ? 'large' : 'medium' }}
     >
-      <SidebarButton icon={<Projects />} />
+            <Menu
+              dropProps={{ stretch: false, align: { top: 'bottom', right: 'right' }, background: "light-2" }}
+              items={[
+                {
+                  onClick: () => router.goToRoomsList(),
+                  label: (
+                    <Box
+                      alignSelf={'center'}
+                      margin={{ left: 'xsmall' }}
+                    >
+                      <Image src={logoWebconf} />
+                    </Box>
+                  ),
+                },
+                {
+                  onClick: () => router.goToCiscoRoomsList(),
+                  label: (
+                    <Box
+                      alignSelf={'center'}
+                      margin={{ left: 'xsmall' }}
+                    >
+                      <Image src={logoCisco} />
+                    </Box>
+                  ),
+                },
+              ]}
+            >
+              <SidebarButton icon={<Projects />} />
+            </Menu>
     </Box>
   );
 };

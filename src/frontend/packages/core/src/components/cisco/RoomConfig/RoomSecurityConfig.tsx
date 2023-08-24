@@ -10,6 +10,7 @@ import { AxiosError } from "axios";
 import { FormikInput } from "../../design-system/Formik/Input";
 import { FormikSubmitButton } from "../../design-system/Formik/SubmitButton/FormikSubmitButton";
 import { CiscoCoSpaceRepository } from "../../../services/cisco";
+import * as Yup from 'yup';
 
 const messages = defineMessages({
     card_title: {
@@ -82,22 +83,36 @@ export const CiscoRoomSecurityConfig = ({ room, ...props }: CiscoRoomSecurityCon
         })
     };
 
+    const validationSchema = Yup.object().shape({
+        owner_secret: Yup.string().matches(
+            /^[0-9]{4}$/,
+            { message: "Please enter 4 digits", excludeEmptyString: false },
+        ),
+        guest_secret: Yup.string().matches(
+            /^[0-9]{4}$/,
+            { message: "Please enter 4 digits", excludeEmptyString: false },
+        )
+    });
+
     return (
         <Box pad={{ bottom: "medium" }}>
             <MagnifyCard title={intl.formatMessage(messages.card_title)} width={{ min: "25vw" }}>
                 {!props.isFetching && props.status == 'success' && (
-                    <Formik initialValues={extractFormData(room)} onSubmit={handleSubmit}>
+                    <Formik
+                        initialValues={extractFormData(room)}
+                        onSubmit={handleSubmit}
+                        validationSchema={validationSchema}
+                    >
                         {({
                             values
                         }) => (
                             <Form>
                                 <Box align={'center'} direction={'row'} justify={'start'}>
                                     <FormikSwitch
-                                        label={intl.formatMessage(messages.ask_for_secret)}
+                                        label={`${intl.formatMessage(messages.ask_for_secret)} (propriétaire)`}
                                         name="is_owner_ask_for_secret"
                                         disabled
                                     />
-                                    <Text style={{ fontStyle: "italic" }}>owner</Text>
                                 </Box>
                                 {values.is_owner_ask_for_secret &&
                                     <FormikInput
@@ -111,11 +126,10 @@ export const CiscoRoomSecurityConfig = ({ room, ...props }: CiscoRoomSecurityCon
 
                                 <Box align={'center'} direction={'row'} justify={'start'}>
                                     <FormikSwitch
-                                        label={intl.formatMessage(messages.ask_for_secret)}
+                                        label={`${intl.formatMessage(messages.ask_for_secret)} (invité)`}
                                         name="is_guest_ask_for_secret"
                                         disabled
                                     />
-                                    <Text style={{ fontStyle: "italic" }}>invité</Text>
                                 </Box>
                                 {values.is_guest_ask_for_secret &&
                                     <FormikInput

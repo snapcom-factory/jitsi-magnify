@@ -65,6 +65,11 @@ class CoSpace(BaseModel):
             return f"{BASE_ROOMS_URL}/meeting/{self.guest_call_id}?secret={self.guest_secret}"
         return None
 
+    @property
+    def sip_url(self) -> str:
+        """get meeting sip url"""
+        return f"{self.call_id}@visiby.finances.gouv.fr"
+
     class Meta:
         ordering = ("name",)
         verbose_name = _("Cisco Room")

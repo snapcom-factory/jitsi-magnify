@@ -23,6 +23,7 @@ class CoSpaceSerializer(serializers.ModelSerializer):
             "owner_jid",
             "owner_url",
             "guest_url",
+            "sip_url",
             "role",
         ]
 

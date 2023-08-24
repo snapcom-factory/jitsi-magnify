@@ -9,9 +9,7 @@ import { KeycloakService } from '../../../../services';
 import { ResponsiveLayoutHeaderAvatar } from '../Header';
 import { Labels } from '../Sidebar/Sidebar';
 import logoCiscoLg from './logo-cisco-lg.png';
-import logoCisco from './logo-cisco.png';
 import logoWebconfLg from './logo-webconf-lg.jpg';
-import logoWebconf from './logo-webconf.jpg';
 
 interface Props {}
 
@@ -44,29 +42,7 @@ export const ManganelliLayout = ({ ...props }: PropsWithChildren<Props>) => {
       <Box width={'100%'}>
         <Header background="light-4" direction="row" height={'74px'} pad="small">
           <Box direction={'row'} style={{ gap: '20px' }}>
-            <Menu
-              dropProps={{ stretch: true, align: { top: 'bottom', right: 'right' } }}
-              items={[
-                {
-                  onClick: () => router.goToRoomsList(),
-                  label: (
-                    <Box alignSelf={'center'} margin={{ left: 'xsmall' }}>
-                      <Image src={logoWebconf} />
-                    </Box>
-                  ),
-                },
-                {
-                  onClick: () => router.goToCiscoRoomsList(),
-                  label: (
-                    <Box alignSelf={'center'} margin={{ left: 'xsmall' }}>
-                      <Image src={logoCisco} />
-                    </Box>
-                  ),
-                },
-              ]}
-            >
-              Mes espaces virtuelles
-            </Menu>
+            Mes espaces virtuelles
           </Box>
           <div>
             {!window.location.pathname.startsWith('/app/users/preferences') && (
