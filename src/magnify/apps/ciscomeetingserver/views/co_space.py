@@ -8,7 +8,7 @@ from rest_framework.decorators import action
 from magnify.apps.ciscomeetingserver.dao import CoSpaceDAO
 from magnify.apps.ciscomeetingserver.serializers import CoSpaceSerializer, CoSpaceSecretSerializer
 from magnify.apps.ciscomeetingserver.models import CoSpaceRoles
-from magnify.apps.ciscomeetingserver.utils.ldap import sync_user_on_cisco
+from magnify.apps.ciscomeetingserver.utils import sync_user_on_cisco
 from magnify.apps.core.models import RoleChoices
 from drf_spectacular.utils import extend_schema
 from .. import consts

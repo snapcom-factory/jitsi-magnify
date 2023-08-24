@@ -1,9 +1,5 @@
 import pprint
 from django.core.management.base import BaseCommand
-from magnify.apps.ciscomeetingserver.consts import (
-    CISCO_API_PASSWORD,
-    CISCO_API_USERNAME,
-)
 from magnify.apps.ciscomeetingserver.dao import CoSpaceDAO
 
 class Command(BaseCommand):

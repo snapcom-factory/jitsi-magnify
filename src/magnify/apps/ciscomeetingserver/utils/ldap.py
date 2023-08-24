@@ -6,7 +6,7 @@ from magnify.apps.ciscomeetingserver.consts import CISCO_LDAP_HOST, CISCO_LDAP_P
 
 def add_user_to_ldap_server(user: User) -> None:
     tls_config = Tls(validate=ssl.CERT_NONE)
-    s = Server(host=CISCO_LDAP_HOST, port=CISCO_LDAP_PORT, use_ssl=False, get_info=ALL, tls=tls_config)
+    s = Server(host=CISCO_LDAP_HOST, port=int(CISCO_LDAP_PORT), use_ssl=False, get_info=ALL, tls=tls_config)
     c = Connection(s, user='cn=admin,dc=my-domain,dc=com', password='snapcom')
     c.bind()
     c.add(

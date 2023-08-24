@@ -29,6 +29,8 @@ services:
       - DJANGO_CONFIGURATION=Development
       - CISCO_API_USERNAME=${CISCO_API_USERNAME:-username}
       - CISCO_API_PASSWORD=${CISCO_API_PASSWORD:-password}
+      - CISCO_LDAP_HOST=${CISCO_LDAP_HOST:-ldaphost}
+      - CISCO_LDAP_PORT=${CISCO_LDAP_PORT:-ldapport}
     env_file:
       - env.d/common
       - env.d/${DB_HOST:-postgresql}
