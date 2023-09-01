@@ -1,12 +1,15 @@
 import React from 'react';
 import { defineMessages, IntlShape } from 'react-intl';
 import { Navigate, Outlet, RouteObject } from 'react-router-dom';
-import { SimpleLayout } from '../../../components';
+import { ManganelliLayout } from '../../../components';
 import { RoomsPath } from '../rooms';
 
 export enum RootPath {
   ROOT = '/app',
   HOME = '/',
+  CISCO = '/cisco',
+  CISCO_SETTINGS = '/cisco/configs',
+  CISCO_ROOM_SETTINGS = '/cisco/:id/configs',
 }
 
 const rootRouteLabels = defineMessages({
@@ -21,9 +24,9 @@ export const getRootRoute = (intl: IntlShape, children: RouteObject[]): RouteObj
   return {
     path: RootPath.ROOT,
     element: (
-      <SimpleLayout urlLogo={'/assets/logo-fun-mooc.svg'}>
+      <ManganelliLayout>
         <Outlet />
-      </SimpleLayout>
+      </ManganelliLayout>
     ),
     children: [
       ...children,

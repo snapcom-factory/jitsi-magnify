@@ -83,6 +83,13 @@ RUN apt-get update && \
     gettext && \
     rm -rf /var/lib/apt/lists/*
 
+# Install ldap-utils
+RUN apt-get update && \
+    echo 'slapd/root_password password password' | debconf-set-selections &&\
+    echo 'slapd/root_password_again password password' | debconf-set-selections && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y slapd ldap-utils && \
+    rm -rf /var/lib/apt/lists/*
+
 # Copy installed python dependencies
 COPY --from=back-builder /install /usr/local
 

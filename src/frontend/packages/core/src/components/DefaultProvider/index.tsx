@@ -41,9 +41,16 @@ export const DefaultProvider = ({ ...props }: DefaultProviderProps) => {
           navigate(JitsiPath.WEB_CONF.replace(':id', roomId));
         },
         goToRoomsList: () => navigate(RootPath.HOME),
+        goToCiscoRoomsList: () => navigate(RootPath.CISCO),
+        goToCiscoSettings: () => navigate(RootPath.CISCO_SETTINGS),
         goToRoomSettings: (roomId?: string) => {
           if (roomId) {
             navigate(RoomsPath.ROOMS_SETTINGS.replace(':id', roomId));
+          }
+        },
+        goToCiscoRoomSettings: (roomId?: string) => {
+          if (roomId) {
+            navigate(RootPath.CISCO_ROOM_SETTINGS.replace(':id', roomId));
           }
         },
       }}

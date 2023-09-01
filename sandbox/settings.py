@@ -56,6 +56,13 @@ class Base(MagnifyCoreConfigurationMixin, Configuration):
     * DB_USER
     """
 
+    CISCO_API_BASE_URL = os.environ.get(
+        "CISCO_API_BASE_URL", "https://192.168.30.99:445"
+    )
+    CISCO_ROOMS_BASE_URL = os.environ.get(
+        "CISCO_ROOMS_BASE_URL", "https://cms.visio.snapcom.eu"
+    )
+
     DEBUG = False
 
     SITE_ID = 1
@@ -89,6 +96,9 @@ class Base(MagnifyCoreConfigurationMixin, Configuration):
         "DEFAULT_VERSION": "1.0",
         "DEFAULT_VERSIONING_CLASS": "rest_framework.versioning.URLPathVersioning",
         "EXCEPTION_HANDLER": "magnify.apps.core.api.exception_handler",
+        "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
+        "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+
     }
 
     # Frontend
@@ -284,6 +294,7 @@ class Base(MagnifyCoreConfigurationMixin, Configuration):
     INSTALLED_APPS = (
         # magnify stuff
         "magnify.apps.core",
+        "magnify.apps.ciscomeetingserver",
         "magnify",
         # Third party apps
         "corsheaders",
@@ -301,6 +312,8 @@ class Base(MagnifyCoreConfigurationMixin, Configuration):
         "django.contrib.staticfiles",
         "django.contrib.messages",
         "django.contrib.humanize",
+        "django_filters",
+        "drf_spectacular",
     )
 
     # Languages
@@ -358,6 +371,17 @@ class Base(MagnifyCoreConfigurationMixin, Configuration):
 
     # Sentry
     SENTRY_DSN = values.Value(None, environ_name="SENTRY_DSN")
+
+    SPECTACULAR_SETTINGS = {
+        'TITLE': 'Magnify API',
+        "swagger": "2.0",
+        'DESCRIPTION': (
+            'This is the schema for the Magnify API.<br/>'
+            'This app is used in the sandbox folder of the project.'
+        ),
+        'VERSION': '1.0.0',
+        'SERVE_INCLUDE_SCHEMA': False,
+    }
 
     @classmethod
     def _get_environment(cls):
@@ -436,6 +460,7 @@ class Development(Base):
         cls.REST_FRAMEWORK["DEFAULT_AUTHENTICATION_CLASSES"] = (
             "magnify.apps.core.authentication.DelegatedJWTAuthentication",
             "rest_framework.authentication.SessionAuthentication",
+            "rest_framework.authentication.BasicAuthentication",
         )
 
 
