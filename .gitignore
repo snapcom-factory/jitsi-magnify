@@ -1,7 +1,8 @@
 # env
 .env
 env.d/crowdin
-
+env.d/common
+env.d/demo
 # virtualenv
 .venv
 venv
