@@ -42,17 +42,6 @@ const SidebarHeader = () => {
                     </Box>
                   ),
                 },
-                {
-                  onClick: () => router.goToCiscoRoomsList(),
-                  label: (
-                    <Box
-                      alignSelf={'center'}
-                      margin={{ left: 'xsmall' }}
-                    >
-                      <Image src={logoCisco} />
-                    </Box>
-                  ),
-                },
               ]}
             >
               <SidebarButton icon={<Projects />} />
